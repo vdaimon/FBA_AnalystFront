@@ -3,9 +3,10 @@
         <table>
             <tr>
                 <button class = "tabs" @click="getTransactions()">Transactions</button>
-                <button class = "tabs">Users</button>
+                <button class = "tabs" @click="getUsers()">Users</button>
             </tr>
         </table>
+        <p v-if="isEnableUserTab">This form is not yet available</p>
         <table v-if="info[0] !== undefined">
             <tr>
                 <th>id</th>
@@ -15,16 +16,16 @@
                 <th>income</th>
             </tr>
             <tr v-for="el in info" :key="el.id">
-                <td>{{el.id}}</td>
+                <td>{{el.transactionId}}</td>
                 <td>{{el.user}}</td>
-                <td>{{el.dateTime}}</td>
+                <td>{{new Date(el.dateTime)}}</td>
                 <td>{{el.amount}}</td>
                 <td>{{el.isIncome}}</td>
                 <td>
                     <button @click="editTransaction(el)">edit</button>
                 </td>
                 <td>
-                    <button @click="deleteTransaction(el.id)">delete</button>
+                    <button @click="deleteTransaction(el.transactionId)">delete</button>
                 </td>
             </tr>
         </table>
@@ -74,9 +75,9 @@ export default {
           info: [],
           serverResponce: [],
           editableTransaction:{
-              id: 0,
+              transactionId: 0,
               user:{
-                  id: 0,
+                  userId: 0,
                   name: ""
               },
               dateTime: "",
@@ -84,9 +85,9 @@ export default {
               isIncome: false
           },
           addableTransaction:{
-              id: 0,
+              transactionId: 0,
               user:{
-                  id: 0,
+                  userId: 0,
                   name: ""
               },
               dateTime: "",
@@ -94,30 +95,40 @@ export default {
               isIncome: false
           },
           isEnableEditForm: false,
-          isEnableAddForm: false               
+          isEnableAddForm: false,
+          isEnableUserTab: false,               
       }
   },
   methods:{
+      getUsers(){
+          this.info = new Array();
+          this.isEnableEditForm = false;
+          this.isEnableAddForm = false;
+          this.isEnableUserTab = true;
+      },
       getTransactions(){
+          this.isEnableUserTab=false;
         axios
         .get('https://localhost:7217/api/Transaction')
-        .then(response => (this.info = response.data));
-        
+        .then(response => {
+            this.info = response.data;
+            console.log(response.data);
+        });
       },
       deleteTransaction(id){
           axios
           .delete('https://localhost:7217/api/Transaction/'+ id)
           .then(response => {
-              (this.serverResponce = response.status);
+              this.serverResponce = response.status;
               this.getTransactions();
           });
       },
       addTransaction(){
-          
+          this.isEnableEditForm = false;
           axios
           .post('https://localhost:7217/api/Transaction', this.addableTransaction)
           .then(response => {
-              (this.serverResponce = response.status);
+              this.serverResponce = response.status;
               this.getTransactions();
               this.isEnableAddForm = false;
               this.addableTransaction.dateTime = "";
@@ -127,8 +138,9 @@ export default {
       },
       
       editTransaction(el){
+          this.isEnableAddForm = false;
           this.isEnableEditForm = true;
-          this.editableTransaction.id = el.id;
+          this.editableTransaction.transactionId = el.transactionId;
           //this.editableTransaction.user.id = el.user.id;
           //this.editableTransaction.user.name = el.user.name;
           this.editableTransaction.dateTime = el.dateTime;
@@ -141,7 +153,7 @@ export default {
           axios
           .put('https://localhost:7217/api/Transaction', this.editableTransaction)
           .then(response => {
-              (this.serverResponce = response.status);
+              this.serverResponce = response.status;
               this.getTransactions();
               this.isEnableEditForm = false
           });
