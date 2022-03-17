@@ -1,12 +1,5 @@
 <template>
     <div align="left">
-        <table>
-            <tr>
-                <button class = "tabs" @click="getTransactions()">Transactions</button>
-                <button class = "tabs" @click="getUsers()">Users</button>
-            </tr>
-        </table>
-        <p v-if="isEnableUserTab">This form is not yet available</p>
         <table v-if="info[0] !== undefined">
             <tr>
                 <th>id</th>
@@ -17,7 +10,7 @@
             </tr>
             <tr v-for="el in info" :key="el.id">
                 <td>{{el.transactionId}}</td>
-                <td>{{el.user}}</td>
+                <td>{{el.userId}}</td>
                 <td>{{new Date(el.dateTime)}}</td>
                 <td>{{el.amount}}</td>
                 <td>{{el.isIncome}}</td>
@@ -38,8 +31,11 @@
         <hr/>
         <div v-if="isEnableAddForm">
             <p>Add new transaction</p>
-            <!--p>User id: <input v-model="addableTransaction.user.id"></p>
-            <p>User name: <input v-model="addableTransaction.user.name"></p-->
+            <p>User id: 
+                <select v-model="addableTransaction.userId">
+                    <option v-for="user in users" :key="user.name" :value="user.userId">{{user.name}}</option>
+                </select>
+            </p>
             <p>Date&amp;time: <input v-model="addableTransaction.dateTime"></p>
             <p>Amount: <input v-model="addableTransaction.amount"></p>
             <p>Income: <input type="checkbox" v-model="addableTransaction.isIncome"></p>
@@ -50,8 +46,11 @@
         </div>
          <div v-if="isEnableEditForm">
             <p>Edit transaction</p>
-            <!--p>User id: <input v-model="editableTransaction.user.id"></p>
-            <p>User name: <input v-model="editableTransaction.user.name"></p-->
+            <p>User id: 
+                <select v-model="editableTransaction.userId">
+                    <option v-for="user in users" :key="user.name" :value="user.userId">{{user.name}}</option>
+                </select>
+            </p>
             <p>Date&amp;time: <input v-model="editableTransaction.dateTime"></p>
             <p>Amount: <input v-model="editableTransaction.amount"></p>
             <p>Income: <input type="checkbox" v-model="editableTransaction.isIncome"></p>
@@ -66,48 +65,46 @@
 <script>
 
 import axios from 'axios'
+
 export default {
-  name: 'AllTransactions',
+  name: 'Transactions-comp',
   props: {
   },
   data(){
       return{
           info: [],
+          users: [],
+          selectedUser:'',
           serverResponce: [],
           editableTransaction:{
               transactionId: 0,
-              user:{
-                  userId: 0,
-                  name: ""
-              },
+              userId: 0,
               dateTime: "",
               amount: 0,
               isIncome: false
           },
           addableTransaction:{
               transactionId: 0,
-              user:{
-                  userId: 0,
-                  name: ""
-              },
+              userId: 0,
               dateTime: "",
               amount: 0,
               isIncome: false
           },
           isEnableEditForm: false,
-          isEnableAddForm: false,
-          isEnableUserTab: false,               
+          isEnableAddForm: false,           
       }
   },
   methods:{
       getUsers(){
-          this.info = new Array();
-          this.isEnableEditForm = false;
-          this.isEnableAddForm = false;
-          this.isEnableUserTab = true;
+         axios
+        .get('https://localhost:7217/api/User')
+        .then(response => {
+            this.users = response.data;
+            console.log(response.data);
+        });
       },
       getTransactions(){
-          this.isEnableUserTab=false;
+        this.getUsers();
         axios
         .get('https://localhost:7217/api/Transaction')
         .then(response => {
@@ -131,6 +128,7 @@ export default {
               this.serverResponce = response.status;
               this.getTransactions();
               this.isEnableAddForm = false;
+              this.addableTransaction.userId = 0;
               this.addableTransaction.dateTime = "";
               this.addableTransaction.amount = 0;
               this.addableTransaction.isIncome = false
@@ -141,8 +139,7 @@ export default {
           this.isEnableAddForm = false;
           this.isEnableEditForm = true;
           this.editableTransaction.transactionId = el.transactionId;
-          //this.editableTransaction.user.id = el.user.id;
-          //this.editableTransaction.user.name = el.user.name;
+          this.editableTransaction.userId = el.userId;
           this.editableTransaction.dateTime = el.dateTime;
           this.editableTransaction.amount = el.amount;
           this.editableTransaction.isIncome = el.isIncome;
@@ -174,12 +171,6 @@ button {
     background-color: ivory;
     border-color: lightgray;
     margin: 5px;
-}
-.tabs {
-    background-color: white;
-    margin: 0px;
-    border-width: 0px 1px 0px 1px;
-    font-size: large;
 }
 table{
     padding: 10px;
