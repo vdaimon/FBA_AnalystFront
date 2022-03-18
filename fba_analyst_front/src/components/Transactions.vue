@@ -1,65 +1,69 @@
 <template>
-    <div align="left">
-        <table v-if="info[0] !== undefined">
-            <tr>
-                <th>id</th>
-                <th>user</th>
-                <th>date &amp; time</th>
-                <th>amount</th>
-                <th>income</th>
-            </tr>
-            <tr v-for="el in info" :key="el.id">
-                <td>{{el.transactionId}}</td>
-                <td>{{el.userId}}</td>
-                <td>{{new Date(el.dateTime)}}</td>
-                <td>{{el.amount}}</td>
-                <td>{{el.isIncome}}</td>
-                <td>
-                    <button @click="editTransaction(el)">edit</button>
-                </td>
-                <td>
-                    <button @click="deleteTransaction(el.transactionId)">delete</button>
-                </td>
-            </tr>
-        </table>
-        <table>
-            <tr>
-                <button @click="isEnableAddForm=true">Add transaction</button>
-            </tr>
-        </table>
-        
-        <hr/>
-        <div v-if="isEnableAddForm">
-            <p>Add new transaction</p>
-            <p>User id: 
-                <select v-model="addableTransaction.userId">
-                    <option v-for="user in users" :key="user.name" :value="user.userId">{{user.name}}</option>
-                </select>
-            </p>
-            <p>Date&amp;time: <input v-model="addableTransaction.dateTime"></p>
-            <p>Amount: <input v-model="addableTransaction.amount"></p>
-            <p>Income: <input type="checkbox" v-model="addableTransaction.isIncome"></p>
-            <p>
-                <button @click="addTransaction()">add</button>
-                <button @click="isEnableAddForm=false">cancel</button>
-            </p>
-        </div>
-         <div v-if="isEnableEditForm">
-            <p>Edit transaction</p>
-            <p>User id: 
-                <select v-model="editableTransaction.userId">
-                    <option v-for="user in users" :key="user.name" :value="user.userId">{{user.name}}</option>
-                </select>
-            </p>
-            <p>Date&amp;time: <input v-model="editableTransaction.dateTime"></p>
-            <p>Amount: <input v-model="editableTransaction.amount"></p>
-            <p>Income: <input type="checkbox" v-model="editableTransaction.isIncome"></p>
-            <p>
-                <button @click="updateTransaction()">save</button>
-                <button @click="isEnableEditForm=false">cancel</button>
-            </p>
-        </div>
+    <el-table :data="info" style="max-width: 900px">
+        <el-table-column prop=transactionId label="Id" />
+        <el-table-column prop=userId label="User" />
+        <el-table-column prop=dateTime label="Date &amp; time"/>
+        <el-table-column prop=amount label="Amount"/>
+        <el-table-column prop=isIncome label="Income"/>
+        <el-table-column>
+            <template #default="scope">
+                <el-button @click="editTransaction(scope.row)">edit</el-button>
+            </template>
+        </el-table-column>
+        <el-table-column>
+            <template #default="scope">
+                <el-button @click="deleteTransaction(scope.row.transactionId)">delete</el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+
+    <div class="addButton">
+        <el-button  @click="isEnableAddForm=true; isEnableEditForm=false">Add transaction</el-button>
     </div>
+
+    <hr/>
+    <el-form style="max-width: 300px" v-if="isEnableAddForm">
+        <el-form-item>Add new transaction</el-form-item>
+        <el-form-item label=User> 
+            <el-select size=small v-model="addableTransaction.userId">
+                <el-option v-for="user in users" :key="user.name" :value="user.userId">{{user.name}}</el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="Date &amp; time">
+            <el-date-picker type=datetime v-model="addableTransaction.dateTime"/>
+        </el-form-item>
+        <el-form-item label=Amount> 
+            <el-input size=small v-model="addableTransaction.amount"/>
+        </el-form-item>
+        <el-form-item label=Income>
+            <el-switch size=small v-model="addableTransaction.isIncome"/>
+        </el-form-item>
+        <el-form-item>
+            <el-button size=small @click="addTransaction()">add</el-button>
+            <el-button size=small @click="isEnableAddForm=false">cancel</el-button>
+        </el-form-item>
+    </el-form>
+    <el-form style="max-width: 300px" v-if="isEnableEditForm">
+        <el-form-item>Edit transaction</el-form-item>
+        <el-form-item label=User> 
+            <el-select size=small v-model="editableTransaction.userId">
+                <el-option v-for="user in users" :key="user.name" :value="user.userId">{{user.name}}</el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="Date &amp; time">
+            <el-date-picker type=datetime v-model="editableTransaction.dateTime"/>
+        </el-form-item>
+        <el-form-item label=Amount> 
+            <el-input size=small v-model="editableTransaction.amount"/>
+        </el-form-item>
+        <el-form-item label=Income>
+            <el-switch size=small v-model="editableTransaction.isIncome"/>
+        </el-form-item>
+        <el-form-item>
+            <el-button size=small @click="updateTransaction()">save</el-button>
+            <el-button size=small @click="isEnableEditForm=false">cancel</el-button>
+        </el-form-item>
+    </el-form>
 </template>
 
 <script>
@@ -138,12 +142,7 @@ export default {
       editTransaction(el){
           this.isEnableAddForm = false;
           this.isEnableEditForm = true;
-          this.editableTransaction.transactionId = el.transactionId;
-          this.editableTransaction.userId = el.userId;
-          this.editableTransaction.dateTime = el.dateTime;
-          this.editableTransaction.amount = el.amount;
-          this.editableTransaction.isIncome = el.isIncome;
-          console.log(this.editableTransaction);
+          this.editableTransaction = el;
       },
 
       updateTransaction(){
@@ -164,20 +163,12 @@ export default {
 
 <style scoped>
 
-th{
-    font-style: normal;
-}
 button {
     background-color: ivory;
     border-color: lightgray;
-    margin: 5px;
 }
-table{
-    padding: 10px;
-}
-td, th{
-    padding-bottom: 10px;
-    padding-right: 20px;
+.addButton{
+    text-align: left;
 }
 
 </style>

@@ -1,18 +1,19 @@
 <template>
-        <table>
-            <tr>
-                <button class = "tabs" @click="showTransactions()">Transactions</button>
-                <button class = "tabs" @click="showUsers()">Users</button>
-            </tr>
+  <table>
+            <el-radio-group v-model="radio1">
+                <el-radio-button size=large @click="showTransactions()" label="Transactions"/>
+                <el-radio-button size=large @click="showUsers()" label="Users"/>
+            </el-radio-group >
         </table>
    <Transactions v-if="isEnableTransactionsForm"/>
    <Users v-if="isEnableUsersForm"/>
-
 </template>
 
 <script>
 import Transactions from './components/Transactions.vue'
 import Users from './components/Users.vue'
+import { ref } from 'vue'
+
 
 export default {
   name: 'App',
@@ -22,6 +23,7 @@ export default {
   },
   data(){
     return{
+      radio1: ref(''),
       isEnableTransactionsForm: false,
       isEnableUsersForm: false,
     }
@@ -50,11 +52,5 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
-}
-.tabs {
-    background-color: white;
-    margin: 0px;
-    border-width: 0px 1px 0px 1px;
-    font-size: large;
 }
 </style>

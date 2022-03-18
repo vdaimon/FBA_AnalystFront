@@ -1,45 +1,44 @@
 <template>
-    <div align="left">
-        <table v-if="info[0] !== undefined">
-            <tr>
-                <th>id</th>
-                <th>name</th>
-            </tr>
-            <tr v-for="el in info" :key="el.id">
-                <td>{{el.userId}}</td>
-                <td>{{el.name}}</td>
-                <td>
-                    <button @click="editUser(el)">edit</button>
-                </td>
-                <td>
-                    <button @click="deleteUser(el.userId)">delete</button>
-                </td>
-            </tr>
-        </table>
-        <table>
-            <tr>
-                <button @click="isEnableAddForm=true">Add user</button>
-            </tr>
-        </table>
-        
-        <hr/>
-        <div v-if="isEnableAddForm">
-            <p>Add new user</p>
-            <p>Name: <input v-model="addableUser.name"></p>
-            <p>
-                <button @click="addUser()">add</button>
-                <button @click="isEnableAddForm=false">cancel</button>
-            </p>
-        </div>
-         <div v-if="isEnableEditForm">
-            <p>Edit user</p>
-            <p>Name: <input v-model="editableUser.name"></p>
-            <p>
-                <button @click="updateUser()">save</button>
-                <button @click="isEnableEditForm=false">cancel</button>
-            </p>
-        </div>
+    <el-table :data="info" style="max-width: 900px">
+        <el-table-column prop=userId label="Id" />
+        <el-table-column prop=name label="Name" />
+        <el-table-column>
+            <template #default="scope">
+                <el-button @click="editUser(scope.row)">edit</el-button>
+            </template>
+        </el-table-column>
+        <el-table-column>
+            <template #default="scope">
+                <el-button @click="deleteUser(scope.row.userId)">delete</el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+
+    <div class="addButton">
+            <el-button @click="isEnableAddForm=true">Add user</el-button>
     </div>
+        
+    <hr/>
+    <el-form style="max-width: 300px" v-if="isEnableAddForm">
+        <el-form-item>Add new user</el-form-item>
+        <el-form-item label=Name> 
+            <el-input size=small v-model="addableUser.name"/>
+        </el-form-item>
+        <el-form-item>
+            <el-button @click="addUser()">add</el-button>
+            <el-button @click="isEnableAddForm=false">cancel</el-button>
+        </el-form-item>
+    </el-form>
+    <el-form style="max-width: 300px" v-if="isEnableEditForm">
+        <el-form-item>Edit user</el-form-item>
+        <el-form-item label=Name> 
+            <el-input size=small v-model="editableUser.name"/>
+        </el-form-item>
+        <el-form-item>
+            <el-button @click="updateUser()">save</el-button>
+            <el-button @click="isEnableEditForm=false">cancel</el-button>
+        </el-form-item>
+    </el-form>
 </template>
 
 <script>
@@ -96,10 +95,11 @@ export default {
       },
       
       editUser(el){
+          console.log(el);
           this.isEnableAddForm = false;
           this.isEnableEditForm = true;
-          this.editableUser.name = el.name;
-          this.editableUser.userId = el.userId;
+          this.editableUser = el;
+          console.log(this.editableUser);
       },
 
       updateUser(){
@@ -120,20 +120,13 @@ export default {
 
 <style scoped>
 
-th{
-    font-style: normal;
-}
 button {
     background-color: ivory;
     border-color: lightgray;
     margin: 5px;
 }
-table{
-    padding: 10px;
-}
-td, th{
-    padding-bottom: 10px;
-    padding-right: 20px;
+.addButton{
+    text-align: left;
 }
 
 </style>
